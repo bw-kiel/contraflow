@@ -9,7 +9,7 @@ class Configuration
 {
 public:
 	Configuration(Piping* _piping) : piping(_piping) {}
-	virtual void set_resistances(double D, double lambda_g) = 0;
+	virtual Resistances set_resistances(double D, double lambda_g) = 0;
 	virtual void set_flow(double L) = 0;
 	virtual Greeks set_greeks(Piping* piping) = 0;
 
@@ -19,6 +19,7 @@ public:
 protected:
 	Piping* piping;
 	double R_1_Delta;
+	double R_2_Delta;
 	double R_12_Delta;
 
 private:
@@ -30,7 +31,7 @@ class Configuration_U : public Configuration
 public:
 	Configuration_U(Piping* _piping);
 	//void set_resistances_pipe(){}
-	void set_resistances(double D, double lambda_g);
+	Resistances set_resistances(double D, double lambda_g);
 
 	void set_flow(double L);
 	Greeks set_greeks(Piping* piping);
@@ -52,7 +53,7 @@ class Configuration_2U : public Configuration
 public:
 	Configuration_2U(Piping* _piping);
 	//void set_resistances_pipe(){}
-	void set_resistances(double D, double lambda_g)
+	Resistances set_resistances(double D, double lambda_g)
 	{
 		//set_resistances_pipe();
 	}
@@ -76,7 +77,7 @@ public:
 
 	//void set_resistances_pipe(){}
 	//void set_resistances_ring(){}
-	void set_resistances(double D, double lambda_g) 
+	Resistances set_resistances(double D, double lambda_g) 
 	{
 		//set_resistances_pipe();
 		//set_resistances_ring();

@@ -1,6 +1,6 @@
 #include "piping.h"
 #include "configuration.h"
-#include "input.h"
+#include "interface.h"
 
 Piping::Piping(PipingData pipingData, FluidData fluidData) : fluid(fluidData),
 		d_0_i(pipingData.d_0_i), d_0_o(pipingData.d_0_o),

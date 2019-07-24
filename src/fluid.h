@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include "utilities.h"
-#include "input.h"
+#include "interface.h"
 // properties, kinetics, characteristic numbers
 
 class Fluid

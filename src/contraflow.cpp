@@ -1,10 +1,10 @@
-#include "construct.h"
+#include "contraflow.h"
 #include "stru3_matrix.h"
 #include "stru3_gauss.cpp"
 
 
 
-Construct::Construct(int type, std::vector<SegmentData> segmentData_vec,
+Contraflow::Contraflow(int type, std::vector<SegmentData> segmentData_vec,
 		PipingData pipingData, FluidData fluidData) :
 					L_tot(0.), N_seg(segmentData_vec.size()),
 					piping(pipingData, fluidData)
@@ -18,11 +18,11 @@ Construct::Construct(int type, std::vector<SegmentData> segmentData_vec,
 		N_tot += segment_vec[i].get_casing().get_N();
 	}
 
-	T_in = stru3::DVec(N_tot);
-	T_out = stru3::DVec(N_tot);
+	result.T_in = stru3::DVec(N_tot);
+	result.T_out = stru3::DVec(N_tot);
 
-	T_fin = stru3::DVec(N_tot);
-	T_fout = stru3::DVec(N_tot);
+	result.T_fin = stru3::DVec(N_tot);
+	result.T_fout = stru3::DVec(N_tot);
 
 	T_s = stru3::DVec(N_tot);
 
@@ -32,77 +32,56 @@ Construct::Construct(int type, std::vector<SegmentData> segmentData_vec,
 	for(int i=0; i<N_seg;++i)
 	{
 		j -= segment_vec[i].get_casing().get_N();
-		segment_vec[i].configure(&T_in[j+1], &T_out[j+1], &T_s[j]);
+		segment_vec[i].configure(&(result.T_in[j]), &(result.T_out[j]), &T_s[j]);
+		result.resistances_vec.push_back({0., 0.});
 	}
 }
 
-void Construct::set_variables(double _Q, double _T_in_0, stru3::DVec _T_s)
-{
-	piping.set_Q(_Q);
-	T_in_0 = _T_in_0;
-	T_s = _T_s;
-}
 
-void Construct::set_functions()
+void Contraflow::set_functions()
 {
 	piping.set_flow(L_tot);
 	for(int i=0; i<segment_vec.size(); ++i)
 	{	
-		segment_vec[i].set_resistances(piping.get_configuration());
+		result.resistances_vec[i] = segment_vec[i].set_resistances(piping.get_configuration());
 		segment_vec[i].set_functions(&piping);
 	}
 }
 
-void Construct::calculate_temperatures()
+void Contraflow::calculate(double _Q, double _T_in_0, stru3::DVec _T_s)
 {
+	piping.set_Q(_Q);
+	T_in_0 = _T_in_0;
+	T_s = _T_s;
+
+	set_functions();
+
 	int dim = 2 * N_seg;
 	stru3::DMat m = assemble_matrix();
 	stru3::DVec b = assemble_RHS();
 
 	// solve matrix
 	stru3::classical_elimination(m, b);
-	stru3::DVec T = stru3::back_substitution(m, b);  // temperatures on sceleton
+	stru3::DVec T_scel = stru3::back_substitution(m, b);  // temperatures on sceleton
 
-	for(int i=0; i < N_seg-1; ++i)
-		segment_vec[i].set_temperatures(T[2+2*i], T[1+2*i]);
-
-	segment_vec[N_seg-1].set_temperatures(T_in_0, T[1+2*(N_seg-1)]);
-
-	T_in[N_tot-1] = T[0];
-	T_out[N_tot-1] = T[0];
+	result.T_in[N_tot-1] = T_scel[0];
+	result.T_out[N_tot-1] = T_scel[0];
 	for(int i=1; i<N_seg; ++i)
 	{
-		T_in[N_tot-1-i*5] = T[2*i];
-		T_out[N_tot-1-i*5] = T[2*i-1];
+		result.T_in[N_tot-1-i*5] = T_scel[2*i];
+		result.T_out[N_tot-1-i*5] = T_scel[2*i-1];
 	}
 
-	T_in[0] = T_in_0;
-	T_out[0] = T[2*N_seg-1];
+	result.T_in[0] = T_in_0;
+	result.T_out[0] = T_scel[2*N_seg-1];
 
-	//for(int i=0; i < N_tot; ++i)
-	//	LOG(T_out[i]);
-	//LOG("....");
-	//for(int i=0; i < N_seg; ++i)
-	//segment_vec[i].log();
-
-
-	LOG("T_in:");
 	for(int i=0; i < N_seg; ++i)
+	{
 		segment_vec[i].calculate_temperatures();
-	
-	for(int i=0; i < N_tot; ++i)
-		LOG(T_in[i]);
-
-	LOG("T_out:");
-	for(int i=0; i < N_tot; ++i)
-		LOG(T_out[i]);
-
-	//for(int i=0; i < N_tot; ++i)
-	//	LOG(T_s[i]);
-;
+	}
 }
 
-stru3::DMat Construct::assemble_matrix()
+stru3::DMat Contraflow::assemble_matrix()
 {
 	int dim = 2 * N_seg;
 	int N;
@@ -136,7 +115,7 @@ stru3::DMat Construct::assemble_matrix()
 	return m;
 }
 
-stru3::DVec Construct::assemble_RHS()
+stru3::DVec Contraflow::assemble_RHS()
 {
 	int dim = 2 * N_seg;
 	int N;

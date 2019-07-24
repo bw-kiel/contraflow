@@ -1,7 +1,7 @@
 #ifndef CASING_H
 #define CASING_H
 
-#include "input.h"
+#include "interface.h"
 
 class Casing
 {

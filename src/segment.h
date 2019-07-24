@@ -7,7 +7,7 @@
 #include "greeks.h"
 #include "piping.h"
 #include "stru3_matrix.h"
-#include "input.h"
+#include "interface.h"
 
 
 
@@ -22,18 +22,15 @@ public:
 		f3 = stru3::DVec(casing.get_N());
 	}
 	Casing get_casing() { return casing; }
-	void set_resistances(Configuration* configuration);
+	Resistances set_resistances(Configuration* configuration);
 	void set_functions(Piping* piping);
-
-	void set_temperatures(double _T_in_0, double _T_out_0) // on sceleton
-	{ T_in_0 = _T_in_0; T_out_0 = _T_out_0; }
 
 	void calculate_temperatures();
 	void configure(double* _T_in, double* _T_out, double* _T_s)
 	{
-		T_in = _T_in; // to second element
-		T_out = _T_out; // to second element
-		T_s = _T_s; // to first element !!!!!
+		T_in = _T_in;
+		T_out = _T_out;
+		T_s = _T_s;
 	}
 	void log()
 	{
@@ -49,7 +46,6 @@ public:
 private:
 	Casing casing;
 	Greeks greeks;
-	double T_in_0, T_out_0;
 	double* T_in;
 	double* T_out;
 	double* T_s;

@@ -4,9 +4,9 @@
 #include <math.h>
 
 
-void Segment::set_resistances(Configuration* configuration)
+Resistances Segment::set_resistances(Configuration* configuration)
 {
-	configuration->set_resistances(casing.get_D(), casing.get_lambda_g());
+	return configuration->set_resistances(casing.get_D(), casing.get_lambda_g());
 }
 
 
@@ -68,14 +68,14 @@ void Segment::calculate_temperatures()
 {
 	const int N = casing.get_N();
 
-	for(int i=0; i<N-1; ++i)  // last node from sceleton
+	for(int i=1; i<N; ++i)  // last node from sceleton
 	{
 		const double dz = casing.get_L() / N;
 		
-		T_in[i] = T_in_0 * f1[i] + T_out_0 * f2[i];
-		T_out[i] = -T_in_0 * f2[i] + T_out_0 * f3[i];
+		T_in[i] = T_in[0] * f1[i-1] + T_out[0] * f2[i-1];
+		T_out[i] = -T_in[0] * f2[i-1] + T_out[0] * f3[i-1];
 
-		for(int j=0; j<i+1; ++j)
+		for(int j=0; j<i; ++j)
 		{
 			T_in[i] += F4((i+1)*dz, j*dz, (j+1)*dz)*(T_s[i]+T_s[i+1])/2;
 			T_out[i] -= F5((i+1)*dz, j*dz, (j+1)*dz)*(T_s[i]+T_s[i+1])/2;

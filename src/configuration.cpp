@@ -28,7 +28,7 @@ void Configuration_U::set_flow(double L)
 	//LOG("Nu: " << piping->Nu_0);
 }
 
-void Configuration_U::set_resistances(double D, double lambda_g)
+Resistances Configuration_U::set_resistances(double D, double lambda_g)
 {
 	double D2 = D * D;
 	double d2 = piping->d_0_o * piping->d_0_o;
@@ -53,6 +53,7 @@ void Configuration_U::set_resistances(double D, double lambda_g)
 
 	double u_a = (1/R_fg) + (1/R_gs) + (1/R_gg);
 	R_1_Delta = R_fg + R_gs;
+	R_2_Delta = R_1_Delta;
 	double C = u_a * R_fg * R_gg;
 	R_12_Delta = (C * C - R_fg * R_fg) / R_gg;
 
@@ -68,6 +69,7 @@ void Configuration_U::set_resistances(double D, double lambda_g)
 	LOG("R_gg:       " << R_gg);
 	LOG("R_1_Delta:  " << R_1_Delta);
 	LOG("R_12_Delta: " << R_12_Delta);*/
+	return {R_1_Delta, R_2_Delta};
 }
 
 Greeks Configuration_U::set_greeks(Piping* piping)

@@ -3,7 +3,7 @@
 
 
 #include "fluid.h"
-#include "input.h"
+#include "interface.h"
 #include <stdexcept>
 class Configuration;
 

@@ -1,6 +1,16 @@
 #ifndef INPUT_H_
 #define INPUT_H_
 
+#include "stru3_matrix.h"
+#include <vector>
+
+struct Resistances
+{
+	double R_1_Delta;
+	double R_2_Delta;
+};
+
+
 struct SegmentData
 {
 	int N;
@@ -30,6 +40,14 @@ struct PipingData
 	double lambda_1;
 };
 
+struct Result
+{
+	stru3::DVec T_in;
+	stru3::DVec T_out;
+	stru3::DVec T_fin;
+	stru3::DVec T_fout;
+	std::vector<Resistances> resistances_vec;
+};
 
 
 
