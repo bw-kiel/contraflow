@@ -34,7 +34,7 @@ if(GTEST)
         add_subdirectory("${PROJECT_SOURCE_DIR}/ext/gtest-1.8.0")
 
         enable_testing()
-        find_package(GTest REQUIRED)
+        # find_package(GTest REQUIRED)
 
         include_directories(
                 "${gtest_SOURCE_DIR}"
