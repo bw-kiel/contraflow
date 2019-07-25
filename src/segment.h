@@ -9,8 +9,8 @@
 #include "stru3_matrix.h"
 #include "interface.h"
 
-
-
+namespace contra
+{
 
 class Segment{
 public:
@@ -54,4 +54,5 @@ private:
 
 };
 
+}
 #endif

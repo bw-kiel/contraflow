@@ -4,6 +4,9 @@
 #include "stru3_matrix.h"
 #include <vector>
 
+namespace contra
+{
+
 struct Resistances
 {
 	double R_1_Delta;
@@ -49,6 +52,6 @@ struct Result
 	std::vector<Resistances> resistances_vec;
 };
 
-
+}
 
 #endif

@@ -3,6 +3,10 @@
 
 #include "interface.h"
 
+
+namespace contra
+{
+
 class Casing
 {
 public:
@@ -23,5 +27,6 @@ private:
 	double lambda_g;
 };
 
+}
 
 #endif

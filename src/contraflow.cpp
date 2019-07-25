@@ -2,6 +2,8 @@
 #include "stru3_matrix.h"
 #include "stru3_gauss.cpp"
 
+namespace contra
+{
 
 
 Contraflow::Contraflow(int type, std::vector<SegmentData> segmentData_vec,
@@ -145,3 +147,4 @@ stru3::DVec Contraflow::assemble_RHS()
 	return b;
 }
 
+}

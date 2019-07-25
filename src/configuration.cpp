@@ -4,6 +4,9 @@
 #include "greeks.h"
 #include <math.h>
 
+namespace contra
+{
+
 Configuration_U::Configuration_U(Piping* _piping) : Configuration(_piping)
 {
 	LOG("U");
@@ -108,3 +111,4 @@ Greeks Configuration_CX::set_greeks(Piping* piping)
 	return Greeks();
 }
 
+}

@@ -4,7 +4,7 @@
 
 TEST(U, SEGMENTS_4)
 {
-	std::vector<SegmentData> segmentDataVec;
+	std::vector<contra::SegmentData> segmentDataVec;
 	for(int i=0; i< 4; ++i)
 		segmentDataVec.push_back(
 				{
@@ -15,7 +15,7 @@ TEST(U, SEGMENTS_4)
 				});
 
 testing::internal::CaptureStdout();
-	Contraflow contraflow(0, segmentDataVec,
+	contra::Contraflow contraflow(0, segmentDataVec,
 			{ // piping
 					.0262,  // d_0_i
 					.032,	// d_0_o

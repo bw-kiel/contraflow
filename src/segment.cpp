@@ -3,6 +3,8 @@
 #include "utilities.h"
 #include <math.h>
 
+namespace contra
+{
 
 Resistances Segment::set_resistances(Configuration* configuration)
 {
@@ -81,4 +83,6 @@ void Segment::calculate_temperatures()
 			T_out[i] -= F5((i+1)*dz, j*dz, (j+1)*dz)*(T_s[i]+T_s[i+1])/2;
 		}
 	}
+}
+
 }

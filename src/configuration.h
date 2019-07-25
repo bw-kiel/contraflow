@@ -4,6 +4,8 @@
 #include "piping.h"
 #include "greeks.h"
 
+namespace contra
+{
 
 class Configuration
 {
@@ -96,5 +98,7 @@ private:
 	double R_adv_1;	// advective resistance - pipe 1
 	double R_adv_2;	// advective resistance
 };
+
+}
 
 #endif

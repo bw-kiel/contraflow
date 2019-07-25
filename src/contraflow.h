@@ -9,7 +9,8 @@
 
 #include "stru3_matrix.h"
 
-
+namespace contra
+{
 
 class Contraflow
 {
@@ -34,5 +35,7 @@ private:
 	stru3::DVec T_s;
 	Result result;
 };
+
+}
 
 #endif

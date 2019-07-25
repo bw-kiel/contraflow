@@ -7,6 +7,9 @@
 #include "interface.h"
 // properties, kinetics, characteristic numbers
 
+namespace contra
+{
+
 class Fluid
 {
 public:
@@ -50,10 +53,7 @@ private:
 	// secondary
 	double c_vol;	// volumetric capacity
 	double Pr;	// Prandl number
-
-
 };
 
-
-
+}
 #endif

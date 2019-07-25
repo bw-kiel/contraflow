@@ -5,6 +5,10 @@
 #include "fluid.h"
 #include "interface.h"
 #include <stdexcept>
+
+namespace contra
+{
+
 class Configuration;
 
 class Piping
@@ -51,4 +55,5 @@ private:
 	friend class Configuration_CX;
 };
 
+}
 #endif

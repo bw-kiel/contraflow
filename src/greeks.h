@@ -4,6 +4,9 @@
 #include "piping.h"
 #include "utilities.h"
 
+namespace contra 
+{
+
 class Greeks
 {
 public:
@@ -31,4 +34,5 @@ private:
 	double delta;
 };
 
+}
 #endif

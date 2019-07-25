@@ -2,6 +2,9 @@
 #include "configuration.h"
 #include "interface.h"
 
+namespace contra
+{
+
 Piping::Piping(PipingData pipingData, FluidData fluidData) : fluid(fluidData),
 		d_0_i(pipingData.d_0_i), d_0_o(pipingData.d_0_o),
 		d_1_i(pipingData.d_1_i), d_1_o(pipingData.d_1_o),
@@ -29,3 +32,4 @@ void Piping::set_flow(double L)
 
 Configuration* Piping::get_configuration() { return configuration; }
 
+}
