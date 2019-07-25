@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd build
 rm timer.txt
 cmake -Dlogging=$1 ..
