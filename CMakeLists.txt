@@ -7,8 +7,6 @@ include_directories(
 	"${PROJECT_BINARY_DIR}"
 	"${PROJECT_SOURCE_DIR}/src"
 	"${PROJECT_SOURCE_DIR}/src/matrix_stru3"
-	"${gtest_SOURCE_DIR}"
-	"${gtest_SOURCE_DIR}/include"
 )
 
 
@@ -32,11 +30,11 @@ enable_testing()
 
 
 if(GTEST)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread")
         add_subdirectory("${PROJECT_SOURCE_DIR}/ext/gtest-1.8.0")
 
         enable_testing()
-        #find_package(GTest REQUIRED)
+        find_package(GTest REQUIRED)
 
         include_directories(
                 "${gtest_SOURCE_DIR}"
