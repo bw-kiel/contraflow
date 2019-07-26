@@ -15,8 +15,6 @@ class Piping
 {
 public:
 	Piping(PipingData pipingData, FluidData fluidData);
-// : d_0_i(.018), d_0_o(0.024), d_1_i(.042), d_1_o(.050), w(0.),
-//			d(d_1_i-d_0_o)  
 	void configure(int type);
 	Configuration* get_configuration();
 	Fluid get_fluid() { return fluid; }

@@ -77,15 +77,9 @@ class Configuration_CX : public Configuration
 public:
 	Configuration_CX(Piping* _piping);
 
-	//void set_resistances_pipe(){}
-	//void set_resistances_ring(){}
-	Resistances set_resistances(double D, double lambda_g) 
-	{
-		//set_resistances_pipe();
-		//set_resistances_ring();
-	}
+	Resistances set_resistances(double D, double lambda_g); 
 
-	void set_flow(double L) {}
+	void set_flow(double L);
 	Greeks set_greeks(Piping* piping);
 private:
 	double R_gs;
