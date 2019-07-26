@@ -29,9 +29,9 @@ void Configuration_U::set_flow(double L)
 	piping->Nu_0 = piping->fluid.Nusselt_pipe(piping->Re_0, L, piping->d_0_i);
 	piping->Nu_1 = piping->Nu_0;
 	
-	LOG("u:  " << piping->u_0);
-	LOG("Re: " << piping->Re_0);
-	LOG("Nu: " << piping->Nu_0);
+	//LOG("u:  " << piping->u_0);
+	//LOG("Re: " << piping->Re_0);
+	//LOG("Nu: " << piping->Nu_0);
 }
 
 Resistances Configuration_U::set_resistances(double D, double lambda_g)
@@ -129,11 +129,92 @@ double Configuration_U::F5(const double &z, const double &a, const double &b, co
 Configuration_2U::Configuration_2U(Piping* _piping) : Configuration(_piping)  
 {
 	LOG("2U");
+	piping->A_0 = M_PI * piping->d_0_i * piping->d_0_i / 4;
+	piping->A_1 = M_PI * piping->d_1_i * piping->d_1_i / 4;
 }
+
+void Configuration_2U::set_flow(double L)
+{
+	piping->u_0 = piping->Q / (piping->A_0 * 2);
+	piping->u_1 = piping->Q / (piping->A_1 * 2);
+
+	piping->Re_0 = piping->fluid.Reynolds(piping->u_0, piping->d_0_i);
+	piping->Re_1 = piping->fluid.Reynolds(piping->u_1, piping->d_1_i);
+
+	piping->Nu_0 = piping->fluid.Nusselt_pipe(piping->Re_0, L, piping->d_0_i);
+	piping->Nu_1 = piping->fluid.Nusselt_pipe(piping->Re_1, L, piping->d_1_i);
+
+	/*LOG("u_0:  " << piping->u_0);
+	LOG("Re_0: " << piping->Re_0);
+	LOG("Nu_0: " << piping->Nu_0);
+	LOG("u_1:  " << piping->u_1);
+	LOG("Re_1: " << piping->Re_1);
+	LOG("Nu_1: " << piping->Nu_1);*/
+}
+
+
+Resistances Configuration_2U::set_resistances(double D, double lambda_g)
+{
+	double D2 = D * D;
+	double d2 = piping->d_0_o * piping->d_0_o;
+	double s = piping->w * 1.41421356;
+	double s2 = s * s;
+	double l = _2PI * lambda_g;
+
+	double x = log(sqrt(D2 + 4 * d2)/(2*_SQ2*piping->d_0_o)) /
+		log(D/(2*piping->d_0_o)); // *2
+	double R_g = (3.098 - (4.432*s/D) + (2.364*s2/D2)) * acosh((D2 + d2 - s2)/(2 * D * piping->d_0_o)) / l;
+
+	double R_ar_1 = acosh((s2 - d2)/d2) / l;
+	double R_ar_2 = acosh((2*s2 - d2)/d2) / l;
+
+	R_adv = 1 / (piping->Nu_0 * piping->fluid.get_lambda() * M_PI);
+	R_con_a = log(piping->d_0_o / piping->d_0_i) /(piping->lambda_0 * _2PI);
+	R_con_b = x * R_g;
+
+	R_gs = (1 - x) * R_g;
+	R_fg = R_adv + R_con_a + R_con_b;
+
+	R_gg_1 = 2 * R_gs * (R_ar_1 - 2 * x * R_g) /(2*R_gs - R_ar_1 + 2 * x * R_g);
+	R_gg_2 = 2 * R_gs * (R_ar_2 - 2 * x * R_g) /(2*R_gs - R_ar_2 + 2 * x * R_g);
+
+
+	double v = R_gg_1 * R_gg_2 / (2*(R_gg_1 + R_gg_2));
+	double u_a = (2/R_fg) + (2/R_gs) + (1/v);
+
+	R_1_Delta = (R_fg + R_gs)/2;
+	R_2_Delta = R_1_Delta;
+
+	R_12_Delta = (u_a * u_a * v - 1/v) * R_fg * R_fg / 4;
+
+	/*LOG("x:          " << x);
+	LOG("R_g:        " << R_g);
+	LOG("R_ar_1:     " << R_ar_1);
+	LOG("R_ar_2:     " << R_ar_2);
+
+	LOG("R_adv:      " << R_adv);
+	LOG("R_con_a:    " << R_con_a);
+	LOG("R_con_b:    " << R_con_b);
+	LOG("R_gs:       " << R_gs);
+	LOG("R_fg:       " << R_fg);
+	LOG("R_gg_1:     " << R_gg_1);
+	LOG("R_gg_2:     " << R_gg_2);
+
+	LOG("R_1_Delta:  " << R_1_Delta);
+	LOG("R_2_Delta:  " << R_2_Delta);
+	LOG("R_12_Delta: " << R_12_Delta);*/
+	return {R_1_Delta, R_2_Delta};
+}
+
 
 Greeks Configuration_2U::set_greeks(Piping* piping)
 {
-	return Greeks();
+	double factor = piping->get_fluid().get_c_vol() * piping->u_0 * piping->A_0;
+	double beta_1 = 1. / (factor * R_1_Delta);
+	double beta_12 = 1. / (factor * R_12_Delta);
+	double gamma = sqrt(beta_1 * (beta_1 + 2 * beta_12));
+
+	return Greeks(beta_1, beta_12, 0., gamma, (beta_1 + beta_12) / gamma);
 }
 
 void Configuration_2U::set_functions(double& f1, double& f2, double& f3, const double& gz, const Greeks& greeks)
@@ -148,14 +229,27 @@ void Configuration_2U::set_functions(double& f1, double& f2, double& f3, const d
 
 double Configuration_2U::F4(const double &z, const double &a, const double &b, const Greeks& greeks)
 {
+	const double gamma = greeks.get_gamma();
+	const double beta_1 = greeks.get_beta_1();
+	const double beta_12 = greeks.get_beta_12();
+	const double delta = greeks.get_delta();
 
-	return 0.;
+        return  (sinh(gamma*(z-a)) - sinh(gamma*(z-b))) * beta_1 / gamma + \
+				(cosh(gamma*(z-b)) - cosh(gamma*(z-a))) *
+                                (beta_1 / gamma) * (delta + beta_12 / gamma);
 }
 
 double Configuration_2U::F5(const double &z, const double &a, const double &b, const Greeks& greeks)
 {
 
-	return 0.;
+	const double gamma = greeks.get_gamma();
+	const double beta_1 = greeks.get_beta_1();
+	const double beta_12 = greeks.get_beta_12();
+	const double delta = greeks.get_delta();
+
+        return (sinh(gamma*(z-a)) - sinh(gamma*(z-b))) * beta_1 / gamma \
+				- (cosh(gamma*(z-b)) - cosh(gamma*(z-a))) *
+                                (beta_1 / gamma) * (delta + beta_12 / gamma);
 }
 
 ///// CX

@@ -18,8 +18,8 @@ public:
 		LOG("beta_12: " << beta_12);
 		LOG("beta:    " << beta);
 		LOG("gamma:   " << gamma);
-		LOG("delta:   " << delta);*/
-		
+		LOG("delta:   " << delta);
+		*/
 	}
 
 	double get_beta_1() const { return beta_1; }

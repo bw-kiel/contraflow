@@ -61,22 +61,20 @@ class Configuration_2U : public Configuration
 public:
 	Configuration_2U(Piping* _piping);
 	//void set_resistances_pipe(){}
-	Resistances set_resistances(double D, double lambda_g)
-	{
-		//set_resistances_pipe();
-	}
+	Resistances set_resistances(double D, double lambda_g);
 
-	void set_flow(double L) {}
+	void set_flow(double L);
 	Greeks set_greeks(Piping* piping);
 	void set_functions(double& f1, double& f2, double& f3, const double& gz, const Greeks& greeks);
 	double F4(const double &z, const double &a, const double &b, const Greeks& greeks);
         double F5(const double &z, const double &a, const double &b, const Greeks& greeks);
 private:
 	double R_gs;
-	double R_con_0_a, R_con_b;
+	double R_con_a;
+	double R_con_b;
 	double R_fg;
-	double R_gg1;
-	double R_gg2;
+	double R_gg_1;
+	double R_gg_2;
 	double R_adv;	// advective resistance
 };
 
