@@ -79,7 +79,7 @@ void Contraflow::calculate(double _Q, double _T_in_0, stru3::DVec _T_s)
 
 	for(int i=0; i < N_seg; ++i)
 	{
-		segment_vec[i].calculate_temperatures();
+		segment_vec[i].calculate_temperatures(piping.get_configuration());
 	}
 }
 
@@ -122,18 +122,21 @@ stru3::DVec Contraflow::assemble_RHS()
 	int dim = 2 * N_seg;
 	int N;
 	stru3::DVec b(dim);
+	Configuration* configuration = piping.get_configuration();
 
 	int ii = 0;
 	for(int i=0; i < N_seg; ++i)
 	{
+		Greeks greeks = segment_vec[i].get_greeks();
 		N = segment_vec[i].get_casing().get_N();
 		double L = segment_vec[i].get_casing().get_L();
 		double dz = L / N;	
 		double z = 0;
+
 		for(int j=0; j < N; ++j)
 		{
-			b[2*i] -= (segment_vec[i].F4(L, z, z+dz) - segment_vec[i].F5(L, z, z+dz)) * (T_s[ii] + T_s[ii+1]) / 2;
-			b[2*i+1] += (segment_vec[i].F4(L, z, z+dz) + segment_vec[i].F5(L, z, z+dz)) * (T_s[ii] + T_s[ii+1]) / 2;
+			b[2*i] -= (configuration->F4(L, z, z+dz, greeks) - configuration->F5(L, z, z+dz, greeks)) * (T_s[ii] + T_s[ii+1]) / 2;
+			b[2*i+1] += (configuration->F4(L, z, z+dz, greeks) + configuration->F5(L, z, z+dz, greeks)) * (T_s[ii] + T_s[ii+1]) / 2;
 
 			z += dz;
 			ii++;

@@ -15,6 +15,10 @@ public:
 	virtual void set_flow(double L) = 0;
 	virtual Greeks set_greeks(Piping* piping) = 0;
 
+	virtual void set_functions(double& f1, double& f2, double& f3, const double& gz, const Greeks& greeks) = 0;
+	virtual double F4(const double &z, const double &a, const double &b, const Greeks& greeks) = 0;
+        virtual double F5(const double &z, const double &a, const double &b, const Greeks& greeks) = 0;
+
 	double get_R_1_Delta() { return R_1_Delta; }
 	double get_R_12_Delta() { return R_12_Delta; }
 
@@ -37,7 +41,9 @@ public:
 
 	void set_flow(double L);
 	Greeks set_greeks(Piping* piping);
-
+	void set_functions(double& f1, double& f2, double& f3, const double& gz, const Greeks& greeks);
+	double F4(const double &z, const double &a, const double &b, const Greeks& greeks);
+        double F5(const double &z, const double &a, const double &b, const Greeks& greeks);
 private:
 	double R_adv;	// advective resistance
 	double R_con_a;
@@ -62,10 +68,12 @@ public:
 
 	void set_flow(double L) {}
 	Greeks set_greeks(Piping* piping);
-
+	void set_functions(double& f1, double& f2, double& f3, const double& gz, const Greeks& greeks);
+	double F4(const double &z, const double &a, const double &b, const Greeks& greeks);
+        double F5(const double &z, const double &a, const double &b, const Greeks& greeks);
 private:
 	double R_gs;
-	double R_con0_a, R_con_b;
+	double R_con_0_a, R_con_b;
 	double R_fg;
 	double R_gg1;
 	double R_gg2;
@@ -81,12 +89,16 @@ public:
 
 	void set_flow(double L);
 	Greeks set_greeks(Piping* piping);
+	void set_functions(double& f1, double& f2, double& f3, const double& gz, const Greeks& greeks);
+	double F4(const double &z, const double &a, const double &b, const Greeks& greeks);
+        double F5(const double &z, const double &a, const double &b, const Greeks& greeks);
 private:
 	double R_gs;
-	double R_con0_a, R_con_b;
+	double R_con_0_a; 
+	double R_con_1_a; 
+	double R_con_b;
 	double R_ff;
 	double R_fg;
-	double R_con1_a;
 
 	double R_adv_0;	// advective resistance - pipe 0
 	double R_adv_1;	// advective resistance - pipe 1

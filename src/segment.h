@@ -6,6 +6,7 @@
 #include "casing.h"
 #include "greeks.h"
 #include "piping.h"
+#include "configuration.h"
 #include "stru3_matrix.h"
 #include "interface.h"
 
@@ -25,7 +26,7 @@ public:
 	Resistances set_resistances(Configuration* configuration);
 	void set_functions(Piping* piping);
 
-	void calculate_temperatures();
+	void calculate_temperatures(Configuration* configuration);
 	void configure(double* _T_in, double* _T_out, double* _T_s)
 	{
 		T_in = _T_in;
@@ -37,12 +38,10 @@ public:
 		LOG(T_out[0]);
 	}
 
-	double F4(const double &z, const double &a, const double &b);
-	double F5(const double &z, const double &a, const double &b);
-
 	double get_f1(int n) { return f1[n]; }
 	double get_f2(int n) { return f2[n]; }
 	double get_f3(int n) { return f3[n]; }
+	Greeks get_greeks() { return greeks; }
 private:
 	Casing casing;
 	Greeks greeks;

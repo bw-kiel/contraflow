@@ -14,21 +14,15 @@ Resistances Segment::set_resistances(Configuration* configuration)
 
 void Segment::set_functions(Piping* piping)
 {
-	greeks = piping->get_configuration()->set_greeks(piping);
+	Configuration* configuration = piping->get_configuration();
+	greeks = configuration->set_greeks(piping);
 
 	const double dgz = greeks.get_gamma() * casing.get_L() / casing.get_N();
 	double gz = dgz;
 
 	for(int i=0; i<casing.get_N(); ++i)
 	{
-		const double ch = cosh(gz);
-		const double sh = sinh(gz);
-		const double ebz = exp(greeks.get_beta() * gz / greeks.get_gamma()); // 1. if not CX
-
-		f1[i] = ebz * (ch - sh * greeks.get_delta());
-		f2[i] = ebz * (sh * greeks.get_beta_12() / greeks.get_gamma()); 
-		f3[i] = ebz * (ch + sh * greeks.get_delta());
-
+		configuration->set_functions(f1[i], f2[i], f3[i], gz, greeks);		
 		//LOG("z:  " << gz/greeks.get_gamma());
 		//LOG("	f1: " << f1[i]);
 		//LOG("	f2: " << f2[i]);
@@ -38,35 +32,7 @@ void Segment::set_functions(Piping* piping)
 	} 
 }
 
-double Segment::F4(const double &z, const double &a, const double &b)
-{
-// not valid for CX
-	double beta_1 = greeks.get_beta_1();
-	double beta_12 = greeks.get_beta_12();
-	double gamma = greeks.get_gamma();
-	double delta = greeks.get_delta();
-
-	double res = (sinh(gamma*(z-a)) - sinh(gamma*(z-b))) * beta_1 / gamma;
-	res += (cosh(gamma*(z-b)) - cosh(gamma*(z-a))) * 
-				(beta_1 / gamma) * (delta + beta_12 / gamma);
-	return res;
-}
-
-double Segment::F5(const double &z, const double &a, const double &b)
-{
-// not valid for CX
-	double beta_1 = greeks.get_beta_1();
-	double beta_12 = greeks.get_beta_12();
-	double gamma = greeks.get_gamma();
-	double delta = greeks.get_delta();
-
-	double res = (sinh(gamma*(z-a)) - sinh(gamma*(z-b))) * beta_1 / gamma;
-	res -= (cosh(gamma*(z-b)) - cosh(gamma*(z-a))) * 
-				(beta_1 / gamma) * (delta + beta_12 / gamma);
-	return res;
-}
-
-void Segment::calculate_temperatures()
+void Segment::calculate_temperatures(Configuration* configuration)
 {
 	const int N = casing.get_N();
 
@@ -79,10 +45,11 @@ void Segment::calculate_temperatures()
 
 		for(int j=0; j<i; ++j)
 		{
-			T_in[i] += F4((i+1)*dz, j*dz, (j+1)*dz)*(T_s[i]+T_s[i+1])/2;
-			T_out[i] -= F5((i+1)*dz, j*dz, (j+1)*dz)*(T_s[i]+T_s[i+1])/2;
+			T_in[i] += configuration->F4((i+1)*dz, j*dz, (j+1)*dz, greeks)*(T_s[i]+T_s[i+1])/2;
+			T_out[i] -= configuration->F5((i+1)*dz, j*dz, (j+1)*dz, greeks)*(T_s[i]+T_s[i+1])/2;
 		}
 	}
 }
 
 }
+

@@ -116,6 +116,9 @@ EXPECT_EQ("CX\n", testing::internal::GetCapturedStdout());
 
 	for(int i=0; i<21; ++i)
 	LOG(contraflow.get_result().T_in[i]);
+	LOG("out");
+	for(int i=0; i<21; ++i)
+		LOG(contraflow.get_result().T_out[i]);
 /*
 testing::internal::CaptureStdout();
 	for(int i=0; i<21; ++i)

@@ -5,7 +5,6 @@
 #include <math.h>
 #include "utilities.h"
 #include "interface.h"
-// properties, kinetics, characteristic numbers
 
 namespace contra
 {
@@ -18,7 +17,7 @@ public:
 	{
 		c_vol = c * rho;
 		Pr = mu * c / lambda;
-		LOG("Pr: " << Pr);
+		//LOG("Pr: " << Pr);
 	} 
 
 	double get_c_vol() { return c_vol; }
