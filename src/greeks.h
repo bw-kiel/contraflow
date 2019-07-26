@@ -14,11 +14,11 @@ public:
 	Greeks(double _beta_1, double _beta_12, double _beta, double _gamma, double _delta) :
 		beta_1(_beta_1), beta_12(_beta_12), beta(_beta), gamma(_gamma), delta(_delta)
 	{
-		LOG("beta_1:  " << beta_1);
+		/*LOG("beta_1:  " << beta_1);
 		LOG("beta_12: " << beta_12);
 		LOG("beta:    " << beta);
 		LOG("gamma:   " << gamma);
-		LOG("delta:   " << delta);
+		LOG("delta:   " << delta);*/
 		
 	}
 

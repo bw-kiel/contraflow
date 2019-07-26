@@ -2,11 +2,14 @@
 
 TEST(U, SEGMENTS_4)
 {
+	int N_seg = 4;
+	int N = 5;
+
 	std::vector<contra::SegmentData> segmentDataVec;
-	for(int i=0; i< 4; ++i)
+	for(int i=0; i< N_seg; ++i)
 		segmentDataVec.push_back(
 				{
-					5,		// N
+					N,		// N
 					100., 	// L
 					0.13, 	// D
 					2.3 	// lambda_g
@@ -33,7 +36,7 @@ testing::internal::CaptureStdout();
 EXPECT_EQ("U\n", testing::internal::GetCapturedStdout());	
 
 
-	stru3::DVec T_s = stru3::DVec(21);  // number of nodes
+	stru3::DVec T_s = stru3::DVec(N*N_seg+1);  // number of nodes
 	T_s =10;
 	//for(int i=0; i<21;++i)
 	//	T_s[i] = i;
@@ -44,16 +47,25 @@ EXPECT_EQ("U\n", testing::internal::GetCapturedStdout());
 			T_s		 // soil temperature
 	);
 
+	LOG("T_in");
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_in[i] << " ";
+	LOG("");
+	LOG("T_out");
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_out[i] << " ";
+	LOG("");
+
 testing::internal::CaptureStdout();
-	for(int i=0; i<21; ++i)
-		LOG(contraflow.get_result().T_in[i]);
-EXPECT_EQ("80\n72.7439\n66.2294\n60.3805\n55.1293\n50.8447\n46.5698\n42.7319\n39.2863\n36.193\n33.8462\n31.3112\n29.0357\n26.9933\n25.1601\n23.945\n22.4266\n21.0644\n19.8425\n18.7467\n18.1944\n", testing::internal::GetCapturedStdout());	
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_in[i] << " ";
+EXPECT_EQ("80 72.8487 66.4284 60.6646 55.4901 50.8447 46.6745 42.9309 39.5704 36.5538 33.8462 31.4159 29.2347 27.2773 25.5209 23.945 22.5314 21.2635 20.1266 19.1075 18.1944 ", testing::internal::GetCapturedStdout());	
 
 
 testing::internal::CaptureStdout();
-	for(int i=0; i<21; ++i)
-		LOG(contraflow.get_result().T_out[i]);
-EXPECT_EQ("11.7221\n11.6195\n11.5228\n11.4308\n11.3426\n12.0657\n12.0728\n12.091\n12.1206\n12.1619\n13.0241\n13.1815\n13.3628\n13.5704\n13.8064\n14.8826\n15.2755\n15.7168\n16.2116\n16.7657\n18.1944\n", testing::internal::GetCapturedStdout());	
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_in[i] << " " ;
+EXPECT_EQ("80 72.8487 66.4284 60.6646 55.4901 50.8447 46.6745 42.9309 39.5704 36.5538 33.8462 31.4159 29.2347 27.2773 25.5209 23.945 22.5314 21.2635 20.1266 19.1075 18.1944 ", testing::internal::GetCapturedStdout());	
 
 
 
@@ -64,7 +76,6 @@ testing::internal::CaptureStdout();
 				contraflow.get_result().resistances_vec[i].R_1_Delta);
 	}
 EXPECT_EQ("0.181525 0.181525\n0.181525 0.181525\n0.181525 0.181525\n0.181525 0.181525\n", testing::internal::GetCapturedStdout());	
-
 }
 
 
@@ -72,11 +83,14 @@ EXPECT_EQ("0.181525 0.181525\n0.181525 0.181525\n0.181525 0.181525\n0.181525 0.1
 
 TEST(CX, SEGMENTS_4)
 {
+	int N_seg = 4;
+	int N = 5;
+
 	std::vector<contra::SegmentData> segmentDataVec;
-	for(int i=0; i< 4; ++i)
+	for(int i=0; i< N_seg; ++i)
 		segmentDataVec.push_back(
 				{
-					5,		// N
+					N,		// N
 					100., 	// L
 					0.1, 	// D
 					2.3 	// lambda_g
@@ -103,7 +117,7 @@ testing::internal::CaptureStdout();
 EXPECT_EQ("CX\n", testing::internal::GetCapturedStdout());	
 
 
-	stru3::DVec T_s = stru3::DVec(21);  // number of nodes
+	stru3::DVec T_s = stru3::DVec(N*N_seg+1);  // number of nodes
 	T_s =10;
 	//for(int i=0; i<21;++i)
 	//	T_s[i] = i;
@@ -114,32 +128,12 @@ EXPECT_EQ("CX\n", testing::internal::GetCapturedStdout());
 			T_s		 // soil temperature
 	);
 
-	for(int i=0; i<21; ++i)
-	LOG(contraflow.get_result().T_in[i]);
-	LOG("out");
-	for(int i=0; i<21; ++i)
-		LOG(contraflow.get_result().T_out[i]);
-/*
-testing::internal::CaptureStdout();
-	for(int i=0; i<21; ++i)
-		LOG(contraflow.get_result().T_in[i]);
-EXPECT_EQ("80\n72.7439\n66.2294\n60.3805\n55.1293\n50.8447\n46.5698\n42.7319\n39.2863\n36.193\n33.8462\n31.3112\n29.0357\n26.9933\n25.1601\n23.945\n22.4266\n21.0644\n19.8425\n18.7467\n18.1944\n", testing::internal::GetCapturedStdout());	
-
-
-testing::internal::CaptureStdout();
-	for(int i=0; i<21; ++i)
-		LOG(contraflow.get_result().T_out[i]);
-EXPECT_EQ("11.7221\n11.6195\n11.5228\n11.4308\n11.3426\n12.0657\n12.0728\n12.091\n12.1206\n12.1619\n13.0241\n13.1815\n13.3628\n13.5704\n13.8064\n14.8826\n15.2755\n15.7168\n16.2116\n16.7657\n18.1944\n", testing::internal::GetCapturedStdout());	
-
-
-
-testing::internal::CaptureStdout();
-	for(int i=0; i<4; ++i)
-	{
-		LOG(contraflow.get_result().resistances_vec[i].R_1_Delta << " " << 
-				contraflow.get_result().resistances_vec[i].R_1_Delta);
-	}
-EXPECT_EQ("0.181525 0.181525\n0.181525 0.181525\n0.181525 0.181525\n0.181525 0.181525\n", testing::internal::GetCapturedStdout());	
-*/
+	LOG("T_in");
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_in[i] << " ";
+	LOG("");
+	LOG("T_out");
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_out[i] << " ";
+	LOG("");
 }
-

@@ -35,7 +35,7 @@ Contraflow::Contraflow(int type, std::vector<SegmentData> segmentData_vec,
 	{
 		j -= segment_vec[i].get_casing().get_N();
 		segment_vec[i].configure(&(result.T_in[j]), &(result.T_out[j]), &T_s[j]);
-		result.resistances_vec.push_back({0., 0.});
+		result.resistances_vec.push_back({0., 0.});  // initialize
 	}
 }
 
@@ -58,7 +58,6 @@ void Contraflow::calculate(double _Q, double _T_in_0, stru3::DVec _T_s)
 
 	set_functions();
 
-	int dim = 2 * N_seg;
 	stru3::DMat m = assemble_matrix();
 	stru3::DVec b = assemble_RHS();
 
@@ -68,10 +67,14 @@ void Contraflow::calculate(double _Q, double _T_in_0, stru3::DVec _T_s)
 
 	result.T_in[N_tot-1] = T_scel[0];
 	result.T_out[N_tot-1] = T_scel[0];
-	for(int i=1; i<N_seg; ++i)
+
+	int j=N_tot-1;
+	for(int i=0; i<N_seg-1;++i)
 	{
-		result.T_in[N_tot-1-i*5] = T_scel[2*i];
-		result.T_out[N_tot-1-i*5] = T_scel[2*i-1];
+		j -= segment_vec[i].get_casing().get_N();
+
+		result.T_in[j] = T_scel[2*(i+1)];
+		result.T_out[j] = T_scel[2*(i+1)-1];
 	}
 
 	result.T_in[0] = T_in_0;
