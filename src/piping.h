@@ -14,6 +14,7 @@ class Configuration;
 class Piping
 {
 public:
+	Piping() = default;
 	Piping(PipingData pipingData, FluidData fluidData);
 	void configure(int type);
 	Configuration* get_configuration();

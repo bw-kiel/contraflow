@@ -50,17 +50,23 @@ void Contraflow::set_functions()
 	}
 }
 
-void Contraflow::calculate(double _Q, double _T_in_0, stru3::DVec _T_s)
+void Contraflow::calculate(double _Q, int mode, double var, stru3::DVec _T_s)
 {
+	if(mode == 0)
+		T_in_0 = var;
+
 	piping.set_Q(_Q);
-	T_in_0 = _T_in_0;
 	T_s = _T_s;
 
 	set_functions();
 
-	stru3::DMat m = assemble_matrix();
-	stru3::DVec b = assemble_RHS();
+	stru3::DMat m = assemble_matrix(mode);
+	stru3::DVec b = assemble_RHS(mode, var);
 
+	//LOG(m);
+	//for(int i=0; i< 2*N_seg; ++i)
+	//	LOG(b[i]);
+	//LOG("");
 	// solve matrix
 	stru3::classical_elimination(m, b);
 	stru3::DVec T_scel = stru3::back_substitution(m, b);  // temperatures on sceleton
@@ -68,27 +74,54 @@ void Contraflow::calculate(double _Q, double _T_in_0, stru3::DVec _T_s)
 	result.T_in[N_tot-1] = T_scel[0];
 	result.T_out[N_tot-1] = T_scel[0];
 
+	//LOG("result:");
+	//for(int i=0; i< 2*N_seg; ++i)
+	//	LOG(T_scel[i]);
+
 	int j=N_tot-1;
-	for(int i=0; i<N_seg-1;++i)
+
+	if(mode == 0)
 	{
-		j -= segment_vec[i].get_casing().get_N();
-
-		result.T_in[j] = T_scel[2*(i+1)];
-		result.T_out[j] = T_scel[2*(i+1)-1];
+		for(int i=0; i<N_seg-1;++i)
+		{
+			j -= segment_vec[i].get_casing().get_N();
+	
+			result.T_in[j] = T_scel[2*(i+1)];
+			result.T_out[j] = T_scel[2*(i+1)-1];
+		}
+	
+		result.T_in[0] = T_in_0;
+		result.T_out[0] = T_scel[2*N_seg-1];
 	}
+	else
+	{
+		for(int i=0; i<N_seg;++i)
+		{
+			j -= segment_vec[i].get_casing().get_N();
+	
+			result.T_in[j] = T_scel[2*(i+1)];
+			result.T_out[j] = T_scel[2*(i+1)-1];
+		}
 
-	result.T_in[0] = T_in_0;
-	result.T_out[0] = T_scel[2*N_seg-1];
+	}
 
 	for(int i=0; i < N_seg; ++i)
 	{
 		segment_vec[i].calculate_temperatures(piping.get_configuration());
 	}
+
+	
 }
 
-stru3::DMat Contraflow::assemble_matrix()
+stru3::DMat Contraflow::assemble_matrix(int mode)
 {
-	int dim = 2 * N_seg;
+	int dim;
+
+	if(mode == 0)
+		dim = 2 * N_seg;
+	else
+		dim = 2 * N_seg + 1;
+
 	int N;
 	stru3::DMat m(dim, dim);  // initializes with 0.
 
@@ -102,27 +135,49 @@ stru3::DMat Contraflow::assemble_matrix()
 		m(2*i+1, 2*i) = 1.;
 	}
 
-	for(int i=0; i < N_seg-1; ++i)
+	if(mode == 0)
 	{
-		N = segment_vec[i].get_casing().get_N();
-
-		m(2*i, 2*i+1) = segment_vec[i].get_f2(N-1) + segment_vec[i].get_f3(N-1);
-		m(2*i, 2*i+2) = segment_vec[i].get_f1(N-1) - segment_vec[i].get_f2(N-1);
-
-		m(2*i+1, 2*i+1) = segment_vec[i].get_f3(N-1) - segment_vec[i].get_f2(N-1);
-		m(2*i+1, 2*i+2) = -(segment_vec[i].get_f1(N-1) + segment_vec[i].get_f2(N-1));
+		for(int i=0; i < N_seg-1; ++i)
+		{
+			N = segment_vec[i].get_casing().get_N();
+	
+			m(2*i, 2*i+1) = segment_vec[i].get_f2(N-1) + segment_vec[i].get_f3(N-1);  // a
+			m(2*i, 2*i+2) = segment_vec[i].get_f1(N-1) - segment_vec[i].get_f2(N-1);  // b
+	
+			m(2*i+1, 2*i+1) = segment_vec[i].get_f3(N-1) - segment_vec[i].get_f2(N-1);  // ta
+			m(2*i+1, 2*i+2) = -(segment_vec[i].get_f1(N-1) + segment_vec[i].get_f2(N-1));  // tb
+		}
+	
+		N = segment_vec[N_seg-1].get_casing().get_N();
+		m(dim-2, dim-1) = segment_vec[N_seg-1].get_f2(N-1) + segment_vec[N_seg-1].get_f3(N-1);  // a
+		m(dim-1, dim-1) = segment_vec[N_seg-1].get_f3(N-1) - segment_vec[N_seg-1].get_f2(N-1);  // ta
 	}
-
-	N = segment_vec[N_seg-1].get_casing().get_N();
-	m(dim-2, dim-1) = segment_vec[N_seg-1].get_f2(N-1) + segment_vec[N_seg-1].get_f3(N-1);
-	m(dim-1, dim-1) = segment_vec[N_seg-1].get_f3(N-1) - segment_vec[N_seg-1].get_f2(N-1);
-
+	else
+	{
+		for(int i=0; i < N_seg; ++i)
+		{
+			N = segment_vec[i].get_casing().get_N();
+	
+			m(2*i, 2*i+1) = segment_vec[i].get_f2(N-1) + segment_vec[i].get_f3(N-1);
+			m(2*i, 2*i+2) = segment_vec[i].get_f1(N-1) - segment_vec[i].get_f2(N-1);
+	
+			m(2*i+1, 2*i+1) = segment_vec[i].get_f3(N-1) - segment_vec[i].get_f2(N-1);
+			m(2*i+1, 2*i+2) = -(segment_vec[i].get_f1(N-1) + segment_vec[i].get_f2(N-1));
+		}
+	
+		m(dim-1, dim-2) = 1.;
+		m(dim-1, dim-1) = -1.;
+	}
 	return m;
 }
 
-stru3::DVec Contraflow::assemble_RHS()
+stru3::DVec Contraflow::assemble_RHS(int mode, double var)
 {
-	int dim = 2 * N_seg;
+	int dim;
+	if(mode == 0)
+		dim = 2 * N_seg;
+	else
+		dim = 2 * N_seg + 1;
 	int N;
 	stru3::DVec b(dim);
 	Configuration* configuration = piping.get_configuration();
@@ -146,9 +201,16 @@ stru3::DVec Contraflow::assemble_RHS()
 		}
 	}
 
-	N = segment_vec[N_seg-1].get_casing().get_N();
-	b[dim-2] -= (segment_vec[N_seg-1].get_f1(N-1) - segment_vec[N_seg-1].get_f2(N-1)) * T_in_0;
-	b[dim-1] += (segment_vec[N_seg-1].get_f1(N-1) + segment_vec[N_seg-1].get_f2(N-1)) * T_in_0;
+	if(mode == 0)
+	{
+		N = segment_vec[N_seg-1].get_casing().get_N();
+		b[dim-2] -= (segment_vec[N_seg-1].get_f1(N-1) - segment_vec[N_seg-1].get_f2(N-1)) * T_in_0;
+		b[dim-1] += (segment_vec[N_seg-1].get_f1(N-1) + segment_vec[N_seg-1].get_f2(N-1)) * T_in_0;
+	}
+	else
+	{
+		b[dim-1] = var;  // temperature difference	
+	}
 
 	return b;
 }

@@ -10,8 +10,7 @@ Piping::Piping(PipingData pipingData, FluidData fluidData) : fluid(fluidData),
 		d_1_i(pipingData.d_1_i), d_1_o(pipingData.d_1_o),
 		w(pipingData.w),
 		lambda_0(pipingData.lambda_0), lambda_1(pipingData.lambda_1),
-		d(0.)
-{}
+		d(0.) {}
 
 void Piping::configure(int type)
 {

@@ -19,14 +19,15 @@ public:
 	virtual double F4(const double &z, const double &a, const double &b, const Greeks& greeks) = 0;
         virtual double F5(const double &z, const double &a, const double &b, const Greeks& greeks) = 0;
 
+	double get_R_0_Delta() { return R_0_Delta; }
 	double get_R_1_Delta() { return R_1_Delta; }
-	double get_R_12_Delta() { return R_12_Delta; }
+	double get_R_12_Delta() { return R_01_Delta; }
 
 protected:
 	Piping* piping;
+	double R_0_Delta;
 	double R_1_Delta;
-	double R_2_Delta;
-	double R_12_Delta;
+	double R_01_Delta;
 
 private:
 

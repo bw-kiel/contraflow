@@ -12,12 +12,13 @@ namespace contra
 class Fluid
 {
 public:
+	Fluid() = default;
 	Fluid(FluidData fluidData) :
 		lambda(fluidData.lambda), mu(fluidData.mu), c(fluidData.c), rho(fluidData.rho)
 	{
 		c_vol = c * rho;
 		Pr = mu * c / lambda;
-		//LOG("Pr: " << Pr);
+		DEBUG("Pr: " << Pr);
 	} 
 
 	double get_c_vol() { return c_vol; }
@@ -37,8 +38,8 @@ public:
 		else
 		{
 			double xi_8 = pow(1.8 * log10(Re) - 1.5, -2.) / 8;
-			// LOG("xi: " << xi_8*8);
-			//LOG("d: " << d);
+			DEBUG("xi: " << xi_8*8);
+			DEBUG("d: " << d);
 			return (1 + pow(d/L, _2_3)) * Re * Pr * xi_8 / (1 + 12.7 * sqrt(xi_8) * (pow(Pr, _2_3)-1));
 		}
 	}
@@ -60,8 +61,7 @@ public:
 		else
 		{
 			double xi_8 = pow(1.8 * log10(Re) - 1.5, -2.) / 8;
-			// LOG("xi: " << xi_8*8);
-			//LOG("d: " << d);
+			DEBUG("xi: " << xi_8*8);
 			return (1 + pow(d_L, _2_3)) * Re * Pr * xi_8 / (1 + 12.7 * sqrt(xi_8) * (pow(Pr, _2_3)-1))
 				*  (.86*pow(d_oi, .84) + (1 - 0.14*pow(d_oi, .6)))/ (1+d_oi); 
 		}

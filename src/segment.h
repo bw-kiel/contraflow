@@ -33,10 +33,6 @@ public:
 		T_out = _T_out;
 		T_s = _T_s;
 	}
-	void log()
-	{
-		LOG(T_out[0]);
-	}
 
 	double get_f1(int n) { return f1[n]; }
 	double get_f2(int n) { return f2[n]; }

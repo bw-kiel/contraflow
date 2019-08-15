@@ -45,8 +45,8 @@ void Segment::calculate_temperatures(Configuration* configuration)
 
 		for(int j=0; j<i; ++j)
 		{
-			T_in[i] += configuration->F4(i*dz, j*dz, (j+1)*dz, greeks)*(T_s[i]+T_s[i+1])/2;
-			T_out[i] -= configuration->F5(i*dz, j*dz, (j+1)*dz, greeks)*(T_s[i]+T_s[i+1])/2;
+			T_in[i] += configuration->F4(i*dz, j*dz, (j+1)*dz, greeks)*(T_s[j]+T_s[j+1])/2;
+			T_out[i] -= configuration->F5(i*dz, j*dz, (j+1)*dz, greeks)*(T_s[j]+T_s[j+1])/2;
 		}
 	}
 }

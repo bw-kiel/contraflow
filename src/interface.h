@@ -9,8 +9,8 @@ namespace contra
 
 struct Resistances
 {
+	double R_0_Delta;
 	double R_1_Delta;
-	double R_2_Delta;
 };
 
 

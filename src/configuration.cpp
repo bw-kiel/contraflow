@@ -16,6 +16,8 @@ Configuration_U::Configuration_U(Piping* _piping) : Configuration(_piping)
 	piping->A_0 = M_PI * piping->d_0_i * piping->d_0_i / 4; 
 	piping->A_1 = piping->A_0; 
 
+	DEBUG("A_0: " << piping->A_0);
+
 }
 
 void Configuration_U::set_flow(double L)
@@ -29,9 +31,9 @@ void Configuration_U::set_flow(double L)
 	piping->Nu_0 = piping->fluid.Nusselt_pipe(piping->Re_0, L, piping->d_0_i);
 	piping->Nu_1 = piping->Nu_0;
 	
-	//LOG("u:  " << piping->u_0);
-	//LOG("Re: " << piping->Re_0);
-	//LOG("Nu: " << piping->Nu_0);
+	DEBUG("u:  " << piping->u_0);
+	DEBUG("Re: " << piping->Re_0);
+	DEBUG("Nu: " << piping->Nu_0);
 }
 
 Resistances Configuration_U::set_resistances(double D, double lambda_g)
@@ -58,31 +60,32 @@ Resistances Configuration_U::set_resistances(double D, double lambda_g)
 	R_gg = A * B / (A - B);
 
 	double u_a = (1/R_fg) + (1/R_gs) + (1/R_gg);
-	R_1_Delta = R_fg + R_gs;
-	R_2_Delta = R_1_Delta;
+	R_0_Delta = R_fg + R_gs;
+	R_1_Delta = R_0_Delta;
 	double C = u_a * R_fg * R_gg;
-	R_12_Delta = (C * C - R_fg * R_fg) / R_gg;
+	R_01_Delta = (C * C - R_fg * R_fg) / R_gg;
 
-	/*LOG("x:          " << x);
-	LOG("R_g:        " << R_g);
-	LOG("R_ar:       " << R_ar);
+	DEBUG("x:          " << x);
+	DEBUG("R_g:        " << R_g);
+	DEBUG("R_ar:       " << R_ar);
 
-	LOG("R_adv:      " << R_adv);
-	LOG("R_con_a:    " << R_con_a);
-	LOG("R_con_b:    " << R_con_b);
-	LOG("R_gs:       " << R_gs);
-	LOG("R_fg:       " << R_fg);
-	LOG("R_gg:       " << R_gg);
-	LOG("R_1_Delta:  " << R_1_Delta);
-	LOG("R_12_Delta: " << R_12_Delta);*/
-	return {R_1_Delta, R_2_Delta};
+	DEBUG("R_adv:      " << R_adv);
+	DEBUG("R_con_a:    " << R_con_a);
+	DEBUG("R_con_b:    " << R_con_b);
+	DEBUG("R_gs:       " << R_gs);
+	DEBUG("R_fg:       " << R_fg);
+	DEBUG("R_gg:       " << R_gg);
+	DEBUG("R_0_Delta:  " << R_0_Delta);
+	DEBUG("R_1_Delta:  " << R_1_Delta);
+	DEBUG("R_01_Delta: " << R_01_Delta);
+	return {R_0_Delta, R_1_Delta};
 }
 
 Greeks Configuration_U::set_greeks(Piping* piping)
 {
 	double factor = piping->get_fluid().get_c_vol() * piping->u_0 * piping->A_0;
-	double beta_1 = 1. / (factor * R_1_Delta);
-	double beta_12 = 1. / (factor * R_12_Delta);
+	double beta_1 = 1. / (factor * R_0_Delta);
+	double beta_12 = 1. / (factor * R_01_Delta);
 	double gamma = sqrt(beta_1 * (beta_1 + 2 * beta_12));
 
 	return Greeks(beta_1, beta_12, 0., gamma, (beta_1 + beta_12) / gamma);
@@ -129,14 +132,17 @@ double Configuration_U::F5(const double &z, const double &a, const double &b, co
 Configuration_2U::Configuration_2U(Piping* _piping) : Configuration(_piping)  
 {
 	LOG("2U");
-	piping->A_0 = M_PI * piping->d_0_i * piping->d_0_i / 4;
-	piping->A_1 = M_PI * piping->d_1_i * piping->d_1_i / 4;
+	piping->A_0 = M_PI * piping->d_0_i * piping->d_0_i/4;
+	piping->A_1 = M_PI * piping->d_1_i * piping->d_1_i/4;
+
+	DEBUG("A_0: " << piping->A_0);
+	DEBUG("A_1: " << piping->A_1);
 }
 
 void Configuration_2U::set_flow(double L)
 {
-	piping->u_0 = piping->Q / (piping->A_0 * 2);
-	piping->u_1 = piping->Q / (piping->A_1 * 2);
+	piping->u_0 = piping->Q / (2*piping->A_0);
+	piping->u_1 = piping->Q / (2*piping->A_1);
 
 	piping->Re_0 = piping->fluid.Reynolds(piping->u_0, piping->d_0_i);
 	piping->Re_1 = piping->fluid.Reynolds(piping->u_1, piping->d_1_i);
@@ -144,12 +150,12 @@ void Configuration_2U::set_flow(double L)
 	piping->Nu_0 = piping->fluid.Nusselt_pipe(piping->Re_0, L, piping->d_0_i);
 	piping->Nu_1 = piping->fluid.Nusselt_pipe(piping->Re_1, L, piping->d_1_i);
 
-	/*LOG("u_0:  " << piping->u_0);
-	LOG("Re_0: " << piping->Re_0);
-	LOG("Nu_0: " << piping->Nu_0);
-	LOG("u_1:  " << piping->u_1);
-	LOG("Re_1: " << piping->Re_1);
-	LOG("Nu_1: " << piping->Nu_1);*/
+	DEBUG("u_0:  " << piping->u_0);
+	DEBUG("Re_0: " << piping->Re_0);
+	DEBUG("Nu_0: " << piping->Nu_0);
+	DEBUG("u_1:  " << piping->u_1);
+	DEBUG("Re_1: " << piping->Re_1);
+	DEBUG("Nu_1: " << piping->Nu_1);
 }
 
 
@@ -157,12 +163,12 @@ Resistances Configuration_2U::set_resistances(double D, double lambda_g)
 {
 	double D2 = D * D;
 	double d2 = piping->d_0_o * piping->d_0_o;
-	double s = piping->w * 1.41421356;
+	double s = piping->w;// * 1.41421356;
 	double s2 = s * s;
 	double l = _2PI * lambda_g;
 
 	double x = log(sqrt(D2 + 4 * d2)/(2*_SQ2*piping->d_0_o)) /
-		log(D/(2*piping->d_0_o)); // *2
+		log(D/(1.41421356*piping->d_0_o)); // *2
 	double R_g = (3.098 - (4.432*s/D) + (2.364*s2/D2)) * acosh((D2 + d2 - s2)/(2 * D * piping->d_0_o)) / l;
 
 	double R_ar_1 = acosh((s2 - d2)/d2) / l;
@@ -178,40 +184,39 @@ Resistances Configuration_2U::set_resistances(double D, double lambda_g)
 	R_gg_1 = 2 * R_gs * (R_ar_1 - 2 * x * R_g) /(2*R_gs - R_ar_1 + 2 * x * R_g);
 	R_gg_2 = 2 * R_gs * (R_ar_2 - 2 * x * R_g) /(2*R_gs - R_ar_2 + 2 * x * R_g);
 
-
 	double v = R_gg_1 * R_gg_2 / (2*(R_gg_1 + R_gg_2));
 	double u_a = (2/R_fg) + (2/R_gs) + (1/v);
 
-	R_1_Delta = (R_fg + R_gs)/2;
-	R_2_Delta = R_1_Delta;
+	R_0_Delta = (R_fg + R_gs)/2;
+	R_1_Delta = R_0_Delta;
 
-	R_12_Delta = (u_a * u_a * v - 1/v) * R_fg * R_fg / 4;
+	R_01_Delta = (u_a * u_a * v - 1/v) * R_fg * R_fg / 4;
 
-	/*LOG("x:          " << x);
-	LOG("R_g:        " << R_g);
-	LOG("R_ar_1:     " << R_ar_1);
-	LOG("R_ar_2:     " << R_ar_2);
+	DEBUG("x:          " << x);
+	DEBUG("R_g:        " << R_g);
+	DEBUG("R_ar_1:     " << R_ar_1);
+	DEBUG("R_ar_2:     " << R_ar_2);
 
-	LOG("R_adv:      " << R_adv);
-	LOG("R_con_a:    " << R_con_a);
-	LOG("R_con_b:    " << R_con_b);
-	LOG("R_gs:       " << R_gs);
-	LOG("R_fg:       " << R_fg);
-	LOG("R_gg_1:     " << R_gg_1);
-	LOG("R_gg_2:     " << R_gg_2);
+	DEBUG("R_adv:      " << R_adv);
+	DEBUG("R_con_a:    " << R_con_a);
+	DEBUG("R_con_b:    " << R_con_b);
+	DEBUG("R_gs:       " << R_gs);
+	DEBUG("R_fg:       " << R_fg);
+	DEBUG("R_gg_1:     " << R_gg_1);
+	DEBUG("R_gg_2:     " << R_gg_2);
 
-	LOG("R_1_Delta:  " << R_1_Delta);
-	LOG("R_2_Delta:  " << R_2_Delta);
-	LOG("R_12_Delta: " << R_12_Delta);*/
-	return {R_1_Delta, R_2_Delta};
+	DEBUG("R_0_Delta:  " << R_0_Delta);
+	DEBUG("R_1_Delta:  " << R_1_Delta);
+	DEBUG("R_01_Delta: " << R_01_Delta);
+	return {R_0_Delta, R_1_Delta};
 }
 
 
 Greeks Configuration_2U::set_greeks(Piping* piping)
 {
-	double factor = piping->get_fluid().get_c_vol() * piping->u_0 * piping->A_0;
-	double beta_1 = 1. / (factor * R_1_Delta);
-	double beta_12 = 1. / (factor * R_12_Delta);
+	double factor = piping->get_fluid().get_c_vol() * piping->u_0 * piping->A_0 * 2;
+	double beta_1 = 1. / (factor * R_0_Delta);
+	double beta_12 = 1. / (factor * R_01_Delta);
 	double gamma = sqrt(beta_1 * (beta_1 + 2 * beta_12));
 
 	return Greeks(beta_1, beta_12, 0., gamma, (beta_1 + beta_12) / gamma);
@@ -259,15 +264,15 @@ Configuration_CX::Configuration_CX(Piping* _piping) : Configuration(_piping)
 	LOG("CX");
 	piping->A_0 = piping->d_0_i * piping->d_0_i * M_PI / 4; 
 	piping->A_1 = (piping->d_1_i * piping->d_1_i - piping->d_0_o * piping->d_0_o) * M_PI / 4;  
-	// LOG("A_0: " << piping->A_0);
-	// LOG("A_1: " << piping->A_1);
+	DEBUG("A_0: " << piping->A_0);
+	DEBUG("A_1: " << piping->A_1);
 }
 
 Greeks Configuration_CX::set_greeks(Piping* piping)
 {
 	double factor = piping->get_fluid().get_c_vol() * piping->u_0 * piping->A_0;
-	double beta_1 = 1. / (factor * R_1_Delta);
-	double beta_12 = 1. / (factor * R_12_Delta);
+	double beta_1 = 1. / (factor * R_0_Delta);
+	double beta_12 = 1. / (factor * R_01_Delta);
 
 	double beta = - beta_1 / 2;
 	double gamma = sqrt(beta_1 * (beta_1 * .25 + beta_12));
@@ -327,13 +332,13 @@ void Configuration_CX::set_flow(double L)
 	piping->Nu_0 = piping->fluid.Nusselt_pipe(piping->Re_0, L, piping->d_0_i);
 	piping->Nu_1 = piping->fluid.Nusselt_ring(piping->Re_1, L, piping->d_0_o, piping->d_1_i);
 	
-	/*LOG("u_0:  " << piping->u_0);
-	LOG("u_1:  " << piping->u_1);
-	LOG("Re_0: " << piping->Re_0);
-	LOG("Re_1: " << piping->Re_1);
-	LOG("Nu_0: " << piping->Nu_0);
-	LOG("Nu_1: " << piping->Nu_1);
-	*/
+	DEBUG("u_0:  " << piping->u_0);
+	DEBUG("u_1:  " << piping->u_1);
+	DEBUG("Re_0: " << piping->Re_0);
+	DEBUG("Re_1: " << piping->Re_1);
+	DEBUG("Nu_0: " << piping->Nu_0);
+	DEBUG("Nu_1: " << piping->Nu_1);
+	
 }
 Resistances Configuration_CX::set_resistances(double D, double lambda_g)
 {
@@ -356,27 +361,27 @@ Resistances Configuration_CX::set_resistances(double D, double lambda_g)
 	R_fg = R_adv_2 + R_con_1_a + R_con_b;
 	R_gs = (1 - x) * R_g;
 
-	R_1_Delta = R_fg + R_gs;
-	R_2_Delta = 0.;
-	R_12_Delta = R_ff;
+	R_0_Delta = R_fg + R_gs;
+	R_1_Delta = 0.;
+	R_01_Delta = R_ff;
 
-	/*LOG("x:          " << x);
-	LOG("R_g:        " << R_g);
+	DEBUG("x:          " << x);
+	DEBUG("R_g:        " << R_g);
 
-	LOG("R_adv_0:      " << R_adv_0);
-	LOG("R_adv_1:      " << R_adv_1);
-	LOG("R_adv_2:      " << R_adv_2);
-	LOG("R_con_0_a:    " << R_con_0_a);
-	LOG("R_con_1_a:    " << R_con_1_a);
-	LOG("R_con_b:      " << R_con_b);
-	LOG("R_ff:         " << R_ff);
-	LOG("R_fg:         " << R_fg);
-	LOG("R_gs:         " << R_gs);
-	LOG("R_1_Delta:  " << R_1_Delta);
-	LOG("R_2_Delta:  " << R_2_Delta);
-	LOG("R_12_Delta: " << R_12_Delta);
-	*/
-	return {R_1_Delta, R_2_Delta};
+	DEBUG("R_adv_0:      " << R_adv_0);
+	DEBUG("R_adv_1:      " << R_adv_1);
+	DEBUG("R_adv_2:      " << R_adv_2);
+	DEBUG("R_con_0_a:    " << R_con_0_a);
+	DEBUG("R_con_1_a:    " << R_con_1_a);
+	DEBUG("R_con_b:      " << R_con_b);
+	DEBUG("R_ff:         " << R_ff);
+	DEBUG("R_fg:         " << R_fg);
+	DEBUG("R_gs:         " << R_gs);
+	DEBUG("R_0_Delta:  " << R_0_Delta);
+	DEBUG("R_1_Delta:  " << R_1_Delta);
+	DEBUG("R_01_Delta: " << R_01_Delta);
+	
+	return {R_0_Delta, R_1_Delta};
 }
 
 }
