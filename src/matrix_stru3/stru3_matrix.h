@@ -43,7 +43,7 @@ public:
 #ifdef CPP11
 	Matrix(Matrix&&);
 	Matrix& operator=(Matrix&&);
-	Matrix(const std::initializer_list<std::initializer_list<T> >& nested_list);
+	//Matrix(const std::initializer_list<std::initializer_list<T> >& nested_list);
 #endif
 	Matrix& operator=(const T& d) { *v = d; return *this; }
 	~Matrix();
@@ -149,6 +149,7 @@ Matrix<T>& Matrix<T>::operator=(Matrix<T>&& m)
 	return *this;
 }
 
+/*
 template<typename T>
 Matrix<T>::Matrix(const std::initializer_list<std::initializer_list<T> >& nested_list)
 {
@@ -164,6 +165,8 @@ Matrix<T>::Matrix(const std::initializer_list<std::initializer_list<T> >& nested
 		for(auto elem: list)
 			(*v)[i++] = elem;
 }
+
+*/
 #endif
 
 template<typename T>

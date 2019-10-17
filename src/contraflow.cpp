@@ -20,13 +20,13 @@ Contraflow::Contraflow(int type, std::vector<SegmentData> segmentData_vec,
 		N_tot += segment_vec[i].get_casing().get_N();
 	}
 
-	result.T_in = stru3::DVec(N_tot);
-	result.T_out = stru3::DVec(N_tot);
+	result.T_in.resize(N_tot);
+	result.T_out.resize(N_tot);
 
-	result.T_fin = stru3::DVec(N_tot);
-	result.T_fout = stru3::DVec(N_tot);
+	result.T_fin.resize(N_tot);
+	result.T_fout.resize(N_tot);
 
-	T_s = stru3::DVec(N_tot);
+	T_s.resize(N_tot);
 
 	piping.configure(type);
 
@@ -35,7 +35,7 @@ Contraflow::Contraflow(int type, std::vector<SegmentData> segmentData_vec,
 	{
 		j -= segment_vec[i].get_casing().get_N();
 		segment_vec[i].configure(&(result.T_in[j]), &(result.T_out[j]), &T_s[j]);
-		result.resistances_vec.push_back({0., 0.});  // initialize
+		result.resistances_vec.push_back(Resistances({0., 0.}));  // initialize
 	}
 }
 
@@ -60,7 +60,9 @@ void Contraflow::calculate(double _Q, int mode, double var, stru3::DVec _T_s)
 
 	set_functions();
 
+	DEBUG("assemble matrix");
 	stru3::DMat m = assemble_matrix(mode);
+	DEBUG("assemble RHS");
 	stru3::DVec b = assemble_RHS(mode, var);
 
 	//LOG(m);
@@ -68,7 +70,9 @@ void Contraflow::calculate(double _Q, int mode, double var, stru3::DVec _T_s)
 	//	LOG(b[i]);
 	//LOG("");
 	// solve matrix
+	DEBUG("classical elimination");
 	stru3::classical_elimination(m, b);
+	DEBUG("back substitution");
 	stru3::DVec T_scel = stru3::back_substitution(m, b);  // temperatures on sceleton
 
 	result.T_in[N_tot-1] = T_scel[0];
@@ -181,6 +185,8 @@ stru3::DVec Contraflow::assemble_RHS(int mode, double var)
 	int N;
 	stru3::DVec b(dim);
 	Configuration* configuration = piping.get_configuration();
+	if(configuration == NULL)
+		std::runtime_error("no configuration");
 
 	int ii = 0;
 	for(int i=0; i < N_seg; ++i)

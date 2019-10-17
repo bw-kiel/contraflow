@@ -12,7 +12,7 @@ namespace contra
 
 Configuration_U::Configuration_U(Piping* _piping) : Configuration(_piping)
 {
-	LOG("U");
+	DEBUG("U");
 	piping->A_0 = M_PI * piping->d_0_i * piping->d_0_i / 4; 
 	piping->A_1 = piping->A_0; 
 
@@ -131,7 +131,7 @@ double Configuration_U::F5(const double &z, const double &a, const double &b, co
 
 Configuration_2U::Configuration_2U(Piping* _piping) : Configuration(_piping)  
 {
-	LOG("2U");
+	DEBUG("2U");
 	piping->A_0 = M_PI * piping->d_0_i * piping->d_0_i/4;
 	piping->A_1 = M_PI * piping->d_1_i * piping->d_1_i/4;
 
@@ -261,7 +261,7 @@ double Configuration_2U::F5(const double &z, const double &a, const double &b, c
 
 Configuration_CX::Configuration_CX(Piping* _piping) : Configuration(_piping)  
 {
-	LOG("CX");
+	DEBUG("CX");
 	piping->A_0 = piping->d_0_i * piping->d_0_i * M_PI / 4; 
 	piping->A_1 = (piping->d_1_i * piping->d_1_i - piping->d_0_o * piping->d_0_o) * M_PI / 4;  
 	DEBUG("A_0: " << piping->A_0);

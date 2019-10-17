@@ -16,12 +16,12 @@ namespace contra
 class Segment{
 public:
 	Segment() {}
-	Segment(SegmentData segmentData) : casing(segmentData)
-	{
-		f1 = stru3::DVec(casing.get_N());
-		f2 = stru3::DVec(casing.get_N());
-		f3 = stru3::DVec(casing.get_N());
-	}
+	Segment(SegmentData segmentData) : casing(segmentData),
+		f1(stru3::DVec(casing.get_N())),
+		f2(stru3::DVec(casing.get_N())),
+		f3(stru3::DVec(casing.get_N()))
+	{}
+
 	Casing get_casing() { return casing; }
 	Resistances set_resistances(Configuration* configuration);
 	void set_functions(Piping* piping);
