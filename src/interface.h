@@ -38,7 +38,7 @@ struct PipingData
 	double d_0_o;
 	double d_1_i;
 	double d_1_o;
-	double w;
+	double w;  // shank space - 2U: across centre !
 	double lambda_0;
 	double lambda_1;
 };

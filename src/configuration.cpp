@@ -5,7 +5,11 @@
 #include <math.h>
 
 #define _SQ2 1.41421356237
+#define _PI 3.14159265359
 #define _2PI 6.283185307179586
+#define _4PI 12.5663706144
+
+#define MULTIPOLE
 
 namespace contra
 {
@@ -38,43 +42,96 @@ void Configuration_U::set_flow(double L)
 
 Resistances Configuration_U::set_resistances(double D, double lambda_g)
 {
-	double D2 = D * D;
-	double d2 = piping->d_0_o * piping->d_0_o;
-	double w2 = piping->w * piping->w;
-	double l = _2PI * lambda_g;
-
-	double x = log(sqrt(D2 + 2 * d2)/(2*piping->d_0_o)) / 
-		log(D/(_SQ2*piping->d_0_o));
-	double R_g = (1.601 - 0.888 * piping->w / D) * acosh((D2 + d2 - w2)/(2 * D * piping->d_0_o)) / l;
-	double R_ar = acosh((2*w2 - d2)/d2) / l;
-
 	R_adv = 1 / (piping->Nu_0 * piping->fluid.get_lambda() * M_PI);
 	R_con_a = log(piping->d_0_o / piping->d_0_i) /(piping->lambda_0 * _2PI);
+
+#ifdef MULTIPOLE 
+	const double R_p = R_adv + R_con_a;
+
+	const double theta_1 = piping->w / D;
+	const double theta_2 = D / piping->d_0_o;
+	const double theta_3 = piping->d_0_o / (2* piping->w);
+	const double sigma = 0.; 
+	const double beta = _2PI * lambda_g * R_p;
+
+	const double th1_2 = theta_1 * theta_1;
+	const double th1_4 = th1_2 * th1_2;
+	const double _1_th1_4 = 1- th1_4;
+
+	const double th3_2 = theta_3 * theta_3;
+
+	const double ln_0 = log(theta_2 / pow(1 - th1_2, sigma));
+	const double ln_01 = log(1. / ( 2 * theta_1 * pow(1 + th1_2, sigma)));
+
+	double R_0 = (beta + ln_0);
+	double R_01 = ln_01;
+
+	///// 1st order term
+	const double b = (1 - beta) / (1 + beta);
+
+	const double nom_plus = th3_2 * pow(_1_th1_4 - 4 * sigma * th1_4, 2.); 
+	const double denom_plus =  _1_th1_4 * _1_th1_4 + th3_2 * b * (_1_th1_4 * _1_th1_4 + 16 * sigma * th1_4);
+
+	const double nom_minus = th3_2 * pow(_1_th1_4 + 4 * sigma * th1_4, 2.); 
+	const double denom_minus =  _1_th1_4 * _1_th1_4 + th3_2 * b * (_1_th1_4 * _1_th1_4 + 8 * sigma * th1_2 * _1_th1_4);
+
+	const double B_plus = b * nom_plus / denom_plus; 
+	const double B_minus = b * nom_minus / denom_minus; 
+
+	R_0 -= (B_plus + B_minus)/2;
+	R_01 -= (B_plus - B_minus)/2;
+	/////
+	
+	R_0 /= _2PI * lambda_g;
+	R_01 /= _2PI * lambda_g;
+
+	R_0_Delta = R_0 + R_01;
+	R_1_Delta = R_0_Delta;
+	R_01_Delta = (R_0*R_0 - R_01*R_01) / R_01;
+#else
+	const double D2 = D * D;
+	const double d2 = piping->d_0_o * piping->d_0_o;
+	const double w2 = piping->w * piping->w;
+	const double l = _2PI * lambda_g;
+
+	const double x = log(sqrt(D2 + 2 * d2)/(2*piping->d_0_o)) / 
+		log(D/(_SQ2*piping->d_0_o));
+	const double R_g = (1.601 - 0.888 * piping->w / D) * acosh((D2 + d2 - w2)/(2 * D * piping->d_0_o)) / l;
+	const double R_ar = acosh((2*w2 - d2)/d2) / l;
+
 	R_con_b = x * R_g;
 
 	R_gs = (1 - x) * R_g;
 	R_fg = R_adv + R_con_a + R_con_b;
 
-	double A = 2 * R_gs;
-	double B = R_ar - 2 * x * R_g;
+	const double A = 2 * R_gs;
+	const double B = R_ar - 2 * x * R_g;
 	R_gg = A * B / (A - B);
 
-	double u_a = (1/R_fg) + (1/R_gs) + (1/R_gg);
+	const double u_a = (1/R_fg) + (1/R_gs) + (1/R_gg);
 	R_0_Delta = R_fg + R_gs;
 	R_1_Delta = R_0_Delta;
-	double C = u_a * R_fg * R_gg;
+	const double C = u_a * R_fg * R_gg;
 	R_01_Delta = (C * C - R_fg * R_fg) / R_gg;
 
 	DEBUG("x:          " << x);
-	DEBUG("R_g:        " << R_g);
 	DEBUG("R_ar:       " << R_ar);
-
-	DEBUG("R_adv:      " << R_adv);
-	DEBUG("R_con_a:    " << R_con_a);
 	DEBUG("R_con_b:    " << R_con_b);
 	DEBUG("R_gs:       " << R_gs);
 	DEBUG("R_fg:       " << R_fg);
 	DEBUG("R_gg:       " << R_gg);
+#endif
+	const double R_b = R_0_Delta / 2.;
+	const double R_a = 2 * R_01_Delta * R_0_Delta / (2* R_0_Delta + R_01_Delta);
+	//const double R_g = R_b - (R_adv + R_con_a) / 2;
+
+	DEBUG("R_a:        " << R_a);
+	DEBUG("R_b:        " << R_b);
+	//DEBUG("R_g:        " << R_g);
+
+	DEBUG("R_adv:      " << R_adv);
+	DEBUG("R_con_a:    " << R_con_a);
+
 	DEBUG("R_0_Delta:  " << R_0_Delta);
 	DEBUG("R_1_Delta:  " << R_1_Delta);
 	DEBUG("R_01_Delta: " << R_01_Delta);
@@ -121,7 +178,7 @@ double Configuration_U::F5(const double &z, const double &a, const double &b, co
 	const double beta_12 = greeks.get_beta_12();
 	const double delta = greeks.get_delta();
 
-        return (sinh(gamma*(z-a)) - sinh(gamma*(z-b))) * beta_1 / gamma \ 
+        return (sinh(gamma*(z-a)) - sinh(gamma*(z-b))) * beta_1 / gamma \
 				- (cosh(gamma*(z-b)) - cosh(gamma*(z-a))) *
                                 (beta_1 / gamma) * (delta + beta_12 / gamma);
 }
@@ -168,7 +225,8 @@ Resistances Configuration_2U::set_resistances(double D, double lambda_g)
 	double l = _2PI * lambda_g;
 
 	double x = log(sqrt(D2 + 4 * d2)/(2*_SQ2*piping->d_0_o)) /
-		log(D/(1.41421356*piping->d_0_o)); // *2
+		log(D/(1.41421356*piping->d_0_o)); 
+		//log(D/(2*piping->d_0_o));
 	double R_g = (3.098 - (4.432*s/D) + (2.364*s2/D2)) * acosh((D2 + d2 - s2)/(2 * D * piping->d_0_o)) / l;
 
 	double R_ar_1 = acosh((s2 - d2)/d2) / l;
