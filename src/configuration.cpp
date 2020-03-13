@@ -8,6 +8,7 @@
 #define _PI 3.14159265359
 #define _2PI 6.283185307179586
 #define _4PI 12.5663706144
+#define _8PI 25.132741228718345 
 
 #define MULTIPOLE
 
@@ -218,22 +219,68 @@ void Configuration_2U::set_flow(double L)
 
 Resistances Configuration_2U::set_resistances(double D, double lambda_g)
 {
-	double D2 = D * D;
-	double d2 = piping->d_0_o * piping->d_0_o;
-	double s = piping->w;// * 1.41421356;
-	double s2 = s * s;
-	double l = _2PI * lambda_g;
 
-	double x = log(sqrt(D2 + 4 * d2)/(2*_SQ2*piping->d_0_o)) /
-		log(D/(1.41421356*piping->d_0_o)); 
-		//log(D/(2*piping->d_0_o));
-	double R_g = (3.098 - (4.432*s/D) + (2.364*s2/D2)) * acosh((D2 + d2 - s2)/(2 * D * piping->d_0_o)) / l;
-
-	double R_ar_1 = acosh((s2 - d2)/d2) / l;
-	double R_ar_2 = acosh((2*s2 - d2)/d2) / l;
+	const double D2 = D * D;
+	const double d2 = piping->d_0_o * piping->d_0_o;
+	const double s = piping->w;// *  1.41421356;
+	const double s2 = s * s;
+	const double l = _2PI * lambda_g;
 
 	R_adv = 1 / (piping->Nu_0 * piping->fluid.get_lambda() * M_PI);
 	R_con_a = log(piping->d_0_o / piping->d_0_i) /(piping->lambda_0 * _2PI);
+
+#ifdef MULTIPOLE
+	const double D4 = D2 * D2;
+	const double D8 = D4 * D4;
+	const double s4 = s2 * s2;
+	const double s8 = s4 * s4;
+	//const double d4 = d2 * d2;
+	//const double d8 = d4 * d4;
+
+	double R_p = R_adv + R_con_a;
+
+	const double lambda_s = lambda_g;
+	const double sigma = (lambda_g - lambda_s) / (lambda_g + lambda_s);
+	const double beta = _2PI * lambda_g * R_p;	
+
+	const double p_pc = d2 / (4*s2);
+	const double p_c = s2 / pow(D8 - s8, .25);
+	const double p_b = D2 / pow(D8 - s8, .25);
+	const double b1 = (1 - beta)/(1 + beta);
+
+	const double p_c2 = p_c * p_c;
+	const double p_b2 = p_b * p_b;
+	const double p_c4 = p_c2 * p_c2;
+	const double p_b4 = p_b2 * p_b2;
+	
+	double R_b = log(D4/(4 * piping->d_0_o * s2*s)) + sigma * log(D8/(D8 - s8));
+	// 1st order term
+	R_b -= b1 * p_pc * pow(3-8*sigma* p_c4, 2.) / (1 + b1 * p_pc * (5 + 64 * sigma * p_c4 * p_b4));
+	R_b /= _8PI * lambda_g;
+	R_b += R_p/4;
+
+	double R_a = log(s/piping->d_0_o) + sigma * log((D4 + s4)/(D4 - s4));
+	// 1st order term
+	R_a -= b1 * p_pc * pow(1+8*sigma* p_c2*p_b2, 2.) / (1 - b1 * p_pc * (3 - 32 * sigma * (p_c2 * p_b4 * p_b2 + p_c4 * p_c2 * p_b2)));
+	R_a /= M_PI * lambda_g;
+	R_a += 2*R_p;
+
+	R_fg = 2 * R_b;
+	R_gs = R_fg;
+	R_gg_1 = 8 * R_b * (R_a - 2*R_b) / (4*R_b - R_a);
+	R_gg_2 = R_gg_1;
+	 
+	DEBUG("R_a:    " << R_a);
+	DEBUG("R_b:    " << R_b);
+#else
+	const double x = log(sqrt(D2 + 4 * d2)/(2*_SQ2*piping->d_0_o)) /
+		log(D/(1.41421356*piping->d_0_o)); 
+		//log(D/(2*piping->d_0_o));
+	const double R_g = (3.098 - (4.432*s/D) + (2.364*s2/D2)) * acosh((D2 + d2 - s2)/(2 * D * piping->d_0_o)) / l;
+
+	const double R_ar_1 = acosh((s2 - d2)/d2) / l;
+	const double R_ar_2 = acosh((2*s2 - d2)/d2) / l;
+
 	R_con_b = x * R_g;
 
 	R_gs = (1 - x) * R_g;
@@ -242,18 +289,19 @@ Resistances Configuration_2U::set_resistances(double D, double lambda_g)
 	R_gg_1 = 2 * R_gs * (R_ar_1 - 2 * x * R_g) /(2*R_gs - R_ar_1 + 2 * x * R_g);
 	R_gg_2 = 2 * R_gs * (R_ar_2 - 2 * x * R_g) /(2*R_gs - R_ar_2 + 2 * x * R_g);
 
-	double v = R_gg_1 * R_gg_2 / (2*(R_gg_1 + R_gg_2));
-	double u_a = (2/R_fg) + (2/R_gs) + (1/v);
+	DEBUG("x:          " << x);
+	DEBUG("R_g:        " << R_g);
+	DEBUG("R_ar_1:     " << R_ar_1);
+	DEBUG("R_ar_2:     " << R_ar_2);
+#endif
+	const double v = R_gg_1 * R_gg_2 / (2*(R_gg_1 + R_gg_2));
+	const double u_a = (2/R_fg) + (2/R_gs) + (1/v);
 
 	R_0_Delta = (R_fg + R_gs)/2;
 	R_1_Delta = R_0_Delta;
 
 	R_01_Delta = (u_a * u_a * v - 1/v) * R_fg * R_fg / 4;
 
-	DEBUG("x:          " << x);
-	DEBUG("R_g:        " << R_g);
-	DEBUG("R_ar_1:     " << R_ar_1);
-	DEBUG("R_ar_2:     " << R_ar_2);
 
 	DEBUG("R_adv:      " << R_adv);
 	DEBUG("R_con_a:    " << R_con_a);

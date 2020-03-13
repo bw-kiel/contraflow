@@ -86,6 +86,94 @@ EXPECT_EQ("0.181515 0.181515\n", testing::internal::GetCapturedStdout());
 
 
 
+/*
+TEST(UU, Multipole)
+{
+	int N_seg = 1;
+	int N = 100;
+
+	std::vector<contra::SegmentData> segmentDataVec;
+	for(int i=0; i< N_seg; ++i)
+		segmentDataVec.push_back(
+				contra::SegmentData({
+					N,		// N
+					200., 	// L
+					2*.0575, 	// D
+					1.5 	// lambda_g
+				}));
+
+//testing::internal::CaptureStdout();
+	contra::Contraflow contraflow(1, segmentDataVec,
+			{ // piping
+					.028,  // d_0_i
+					.032,	// d_0_o
+					-1.,	// d_1_i
+					-1.,	// d_1_o
+					.02263 * 2,	// w
+					.38,	// lambda_0 ??
+					.38		// lambda_1 ==
+			},
+			{ // fluid
+					.6405,		// lambda ??
+					.54741e-3, 	// mu  ??
+					4180., 	// c
+					997. 		// rho
+			});  // type, number of segments
+
+//EXPECT_EQ("U\n", testing::internal::GetCapturedStdout());	
+
+
+	stru3::DVec T_s = stru3::DVec(N*N_seg+1);  // number of nodes
+	T_s = 10;
+	//for(int i=0; i<21;++i)
+	//	T_s[i] = i;
+
+	contraflow.calculate(
+			1.5/3600, // flow rate Q
+			0, 	 //mode, T_in given
+			80, 	 // feed flow temperature T_in_0
+			T_s		 // soil temperature
+	);
+
+	LOG("T_in");
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_in[i] << " ";
+	LOG("");
+	LOG("T_out");
+	for(int i=0; i<N*N_seg+1; ++i)
+		std::cout << contraflow.get_result().T_out[i] << " ";
+	LOG("");
+
+//testing::internal::CaptureStdout();
+//	for(int i=0; i<N*N_seg+1; ++i)
+//		std::cout << contraflow.get_result().T_in[i] << " ";
+//EXPECT_EQ("", testing::internal::GetCapturedStdout());	
+
+
+//testing::internal::CaptureStdout();
+//	for(int i=0; i<N*N_seg+1; ++i)
+//		std::cout << contraflow.get_result().T_out[i] << " " ;
+//EXPECT_EQ("", testing::internal::GetCapturedStdout());	
+
+
+
+//testing::internal::CaptureStdout();
+//	for(int i=0; i<N_seg; ++i)
+//	{
+//		LOG(contraflow.get_result().resistances_vec[i].R_1_Delta << " " << 
+//				contraflow.get_result().resistances_vec[i].R_1_Delta);
+//	}
+//EXPECT_EQ("0.181515 0.181515\n", testing::internal::GetCapturedStdout());	
+
+
+}
+
+*/
+///////////////////////////////////////////////////////////////////////
+
+
+
+/*
 
 
 
@@ -255,9 +343,10 @@ EXPECT_EQ("0.181515 0.181515\n", testing::internal::GetCapturedStdout());
 
 }
 
+*/
 ///////////////////////////////////////////////////////////////////////
 
-TEST(_2U, SEGMENTS_1)
+TEST(UU, SEGMENTS_1)
 {
 	int N_seg = 1;
 	int N = 100;
@@ -354,6 +443,7 @@ testing::internal::CaptureStdout();
 	}
 EXPECT_EQ("0.106591 0.106591\n", testing::internal::GetCapturedStdout());	
 }
+
 
 
 ///////////////////////////////////////////////////////////////////////
