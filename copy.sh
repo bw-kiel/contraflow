@@ -1,7 +1,7 @@
 #!/bin/bash
 
-simulator=../ogs_kb1
-wdc_folder=$simulator/Libs/Contraflow
+simulator_folder=../ogs_kb1
+wdc_folder=$simulator_folder/Libs/Contraflow
 
 mkdir -p $wdc_folder
 
