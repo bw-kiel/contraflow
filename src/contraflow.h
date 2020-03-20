@@ -6,6 +6,7 @@
 #include "piping.h"
 #include "interface.h"
 #include <vector>
+#include <inttypes.h>
 
 #include "stru3_matrix.h"
 
@@ -26,8 +27,8 @@ private:
 	stru3::DVec assemble_RHS(int mode, double var);
 
 	double L_tot;	// total length
-	int N_seg;
-	int N_tot; // number of total nodes
+	int64_t N_seg;
+	int64_t N_tot; // number of total nodes
 	Piping piping;
 
 	std::vector<Segment> segment_vec;

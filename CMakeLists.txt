@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(Contraflow)
 
-option(GTEST "Use google test" ON)
+option(GTEST "Use google test" OFF)
 
 include_directories(
 	"${PROJECT_BINARY_DIR}"

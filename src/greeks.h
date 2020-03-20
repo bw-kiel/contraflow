@@ -10,7 +10,7 @@ namespace contra
 class Greeks
 {
 public:
-	Greeks() {}
+	Greeks() : beta_1(0.), beta_12(0.), beta(0.), gamma(0.), delta(0.) {}
 	Greeks(double _beta_1, double _beta_12, double _beta, double _gamma, double _delta) :
 		beta_1(_beta_1), beta_12(_beta_12), beta(_beta), gamma(_gamma), delta(_delta)
 	{

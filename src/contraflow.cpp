@@ -8,11 +8,9 @@ namespace contra
 
 Contraflow::Contraflow(int type, std::vector<SegmentData> segmentData_vec,
 		PipingData pipingData, FluidData fluidData) :
-					L_tot(0.), N_seg(segmentData_vec.size()),
-					piping(pipingData, fluidData)
+					L_tot(0.), N_seg(segmentData_vec.size()), N_tot(1),
+					piping(pipingData, fluidData), T_in_0(0.)
 {
-	N_tot = 1;
-
 	for(int i=0; i<N_seg;++i)
 	{
 		segment_vec.push_back(Segment(segmentData_vec[i]));
@@ -86,7 +84,7 @@ void Contraflow::calculate(double _Q, int mode, double var, stru3::DVec _T_s)
 
 	if(mode == 0)
 	{
-		for(int i=0; i<N_seg-1;++i)
+		for(int64_t i=0; i<N_seg-1;++i)
 		{
 			j -= segment_vec[i].get_casing().get_N();
 	
@@ -99,22 +97,19 @@ void Contraflow::calculate(double _Q, int mode, double var, stru3::DVec _T_s)
 	}
 	else
 	{
-		for(int i=0; i<N_seg;++i)
+		for(int64_t i=0; i<N_seg;++i)
 		{
 			j -= segment_vec[i].get_casing().get_N();
 	
 			result.T_in[j] = T_scel[2*(i+1)];
 			result.T_out[j] = T_scel[2*(i+1)-1];
 		}
-
 	}
 
 	for(int i=0; i < N_seg; ++i)
 	{
 		segment_vec[i].calculate_temperatures(piping.get_configuration());
 	}
-
-	
 }
 
 stru3::DMat Contraflow::assemble_matrix(int mode)
@@ -186,10 +181,10 @@ stru3::DVec Contraflow::assemble_RHS(int mode, double var)
 	stru3::DVec b(dim);
 	Configuration* configuration = piping.get_configuration();
 	if(configuration == NULL)
-		std::runtime_error("no configuration");
+		throw std::runtime_error("no configuration");
 
 	int ii = 0;
-	for(int i=0; i < N_seg; ++i)
+	for(int64_t i=0; i < N_seg; ++i)
 	{
 		Greeks greeks = segment_vec[i].get_greeks();
 		N = segment_vec[i].get_casing().get_N();
@@ -197,7 +192,7 @@ stru3::DVec Contraflow::assemble_RHS(int mode, double var)
 		double dz = L / N;	
 		double z = 0;
 
-		for(int j=0; j < N; ++j)
+		for(int64_t j=0; j < N; ++j)
 		{
 			b[2*i] -= (configuration->F4(L, z, z+dz, greeks) - configuration->F5(L, z, z+dz, greeks)) * (T_s[ii] + T_s[ii+1]) / 2;
 			b[2*i+1] += (configuration->F4(L, z, z+dz, greeks) + configuration->F5(L, z, z+dz, greeks)) * (T_s[ii] + T_s[ii+1]) / 2;

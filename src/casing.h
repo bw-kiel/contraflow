@@ -10,7 +10,7 @@ namespace contra
 class Casing
 {
 public:
-	Casing() {}
+	Casing() : D(0.), L(0.), N(0), lambda_g(0.) {}
 	Casing(SegmentData segmentData) :
 		D(segmentData.D), L(segmentData.L), N(segmentData.N),
 		lambda_g(segmentData.lambda_g) {}

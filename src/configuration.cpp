@@ -2,6 +2,8 @@
 #include "utilities.h"
 #include "fluid.h"
 #include "greeks.h"
+
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 #define _SQ2 1.41421356237

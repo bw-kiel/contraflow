@@ -10,7 +10,7 @@ namespace contra
 class Configuration
 {
 public:
-	Configuration(Piping* _piping) : piping(_piping) {}
+	Configuration(Piping* _piping) : piping(_piping), R_0_Delta(0.), R_1_Delta(0.), R_01_Delta(0.) {}
 	virtual Resistances set_resistances(double D, double lambda_g) = 0;
 	virtual void set_flow(double L) = 0;
 	virtual Greeks set_greeks(Piping* piping) = 0;

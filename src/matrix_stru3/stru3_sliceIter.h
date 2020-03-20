@@ -229,7 +229,7 @@ T dot_product(const Cslice_iter<T>& cit_a, const Cslice_iter<T>& cit_b)
 	T res = 0.;
 	for(Cslice_iter<T> cit_a2(cit_a), cit_b2(cit_b); cit_a2 != cit_a.end(); ++cit_a2, ++cit_b2)
 		res += *cit_a2 * *cit_b2;
-
+	return res;
 }
 
 #endif
